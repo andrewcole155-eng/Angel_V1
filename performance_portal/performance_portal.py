@@ -79,7 +79,7 @@ if account:
     col1.metric("Portfolio Value", f"${float(account.portfolio_value):,.2f}")
     col2.metric("Cash Balance", f"${float(account.cash):,.2f}")
     col3.metric("Today's P/L", f"${float(account.equity) - float(account.last_equity):,.2f}")
-    col4.metric("Total P/L", f"${float(account.equity) - float(config.get('TOTAL_PORTFOLIO_CASH', 0)):,.2f}")
+    col4.metric("Total P/L", f"${float(account.equity) - TOTAL_PORTFOLIO_CASH:,.2f}")
 
     # --- PORTFOLIO HISTORY CHART ---
     st.header("Portfolio Value Over Time (30 Days)")
