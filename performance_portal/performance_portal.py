@@ -37,11 +37,12 @@ def get_account_data():
     try:
         account = api.get_account()
         positions = api.list_positions()
-        orders = api.list_orders(status='closed', limit=100, direction='desc')
-        return account, positions, orders
+        open_orders = api.list_orders(status='open', direction='desc')
+        closed_orders = api.list_orders(status='closed', limit=100, direction='desc')
+        return account, positions, open_orders, closed_orders
     except APIError as e:
         st.error(f"Error fetching data from Alpaca: {e}")
-        return None, [], []
+        return None, [], [], []
 
 @st.cache_data(ttl=3600) # Cache portfolio history for 1 hour
 def get_portfolio_history():
@@ -69,7 +70,7 @@ st.title("📈 Alpaca Trading Performance Overview")
 if st.button("Refresh Data"):
     st.cache_data.clear()
 
-account, positions, orders = get_account_data()
+account, positions, open_orders, closed_orders = get_account_data()
 history_df = get_portfolio_history()
 
 if account:
@@ -88,6 +89,23 @@ if account:
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.warning("Could not load portfolio history chart.")
+
+    # --- PENDING ORDERS ---
+    st.header("Pending Orders")
+    if open_orders:
+        pending_data = []
+        for o in open_orders:
+            pending_data.append({
+                "Symbol": o.symbol,
+                "Qty": float(o.qty),
+                "Side": o.side.title(),
+                "Type": o.order_type.title(),
+                "Status": o.status.title(),
+                "Submitted At": pd.to_datetime(o.submitted_at).strftime('%Y-%m-%d %H:%M:%S')
+            })
+        st.dataframe(pd.DataFrame(pending_data), use_container_width=True)
+    else:
+        st.info("No pending orders.")
 
     # --- CURRENT POSITIONS ---
     st.header("Current Open Positions")
@@ -109,9 +127,9 @@ if account:
 
     # --- RECENT TRADES ---
     st.header("Recent Closed Orders (Last 100)")
-    if orders:
+    if closed_orders:
         orders_data = []
-        for o in orders:
+        for o in closed_orders:
             orders_data.append({
                 "Symbol": o.symbol,
                 "Qty": float(o.filled_qty),
