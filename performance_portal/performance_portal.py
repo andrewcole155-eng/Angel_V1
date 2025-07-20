@@ -130,14 +130,19 @@ if account:
     if closed_orders:
         orders_data = []
         for o in closed_orders:
+            # --- ADDED CHECKS for None ---
+            avg_price = float(o.filled_avg_price) if o.filled_avg_price is not None else 0
+            filled_qty = float(o.filled_qty) if o.filled_qty is not None else 0
+            filled_at = pd.to_datetime(o.filled_at).strftime('%Y-%m-%d %H:%M:%S') if o.filled_at is not None else "N/A"
+            
             orders_data.append({
                 "Symbol": o.symbol,
-                "Qty": float(o.filled_qty),
+                "Qty": filled_qty,
                 "Side": o.side.title(),
                 "Type": o.order_type.title(),
-                "Avg. Fill Price": f"${float(o.filled_avg_price):,.2f}",
+                "Avg. Fill Price": f"${avg_price:,.2f}",
                 "Status": o.status.title(),
-                "Filled At": pd.to_datetime(o.filled_at).strftime('%Y-%m-%d %H:%M:%S')
+                "Filled At": filled_at
             })
         st.dataframe(pd.DataFrame(orders_data), use_container_width=True)
     else:
