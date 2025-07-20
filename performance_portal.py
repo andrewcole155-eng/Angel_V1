@@ -16,15 +16,6 @@ import plotly.express as px
 # --- CONFIGURATION ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] (PerformancePortal) %(message)s')
 
-# --- LOAD CONFIG ---
-try:
-    with open('config/config.json', 'r') as f:
-        config = json.load(f)
-    logging.info("Successfully loaded master configuration.")
-except Exception as e:
-    st.error(f"FATAL: Could not load config file: {e}")
-    sys.exit(1)
-
 # --- SECRETS & API CONNECTION (Cloud Version) ---
 # This version reads secrets from Streamlit's secrets manager instead of a local file.
 try:
